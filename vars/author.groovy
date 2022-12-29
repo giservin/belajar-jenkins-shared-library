@@ -1,3 +1,3 @@
-def call() {
-    "Giservin TZ"
+def call(String nama) {
+    sh "echo ${nama}"
 }
