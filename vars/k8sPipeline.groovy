@@ -4,11 +4,11 @@ def call(Map config){
         triggers {
             githubPush()
         }
-        environment {
-            IMAGE_NAME = config.image_name
-            IMAGE_TAG = config.image_tag
-            DEPLOYMENT = config.deployment
-        }
+        // environment {
+        //     IMAGE_NAME = config.image_name
+        //     IMAGE_TAG = config.image_tag
+        //     DEPLOYMENT = config.deployment
+        // }
         stages {
             stage("Build Image") {
                 when {
@@ -24,13 +24,13 @@ def call(Map config){
                 }
                 steps {
                     script {
-                        sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                        sh "docker build -t ${config.image_name}:${config.image_tag} ."
                         withCredentials([usernamePassword(
                             credentialsId: config.dockerCredentials, 
                             usernameVariable: "DOCKER_USERNAME",
                             passwordVariable: "DOCKER_PASSWORD")]) {
                                 sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
-                                sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                                sh "docker push ${config.image_name}:${config.image_tag}"
                             }
                         if(config.type == 'frontend') {
                             sh "docker image prune --filter label=stage=builder -f"
@@ -46,7 +46,7 @@ def call(Map config){
                 }
                 steps {
                     script {
-                        sh "kubectl delete deployment ${DEPLOYMENT}"
+                        sh "kubectl delete deployment ${config.deployment}"
                         sh 'kubectl apply -f k8s/deployment.yaml'
                         sh 'kubectl get svc'
                     }
